@@ -1,2 +1,17 @@
 # dev-toolbox
-Fiches pratiques et squelettes de code réutilisables pour PHP, SQL, React et le déploiement Linux.
+
+Boîte à outils personnelle pour retrouver rapidement les bases utiles en développement full-stack.
+
+## Contenu
+
+- `docs/` : fiches simples sur PHP, SQL, Git, React et Linux.
+- `snippets/` : petits morceaux de code indépendants et réutilisables.
+- `templates/` : squelettes de projets plus complets à assembler et adapter.
+
+## Méthode
+
+Chaque ajout doit être court, commenté, testable et compréhensible. Un exemple n'est conservé que si je peux expliquer son fonctionnement et ses règles de sécurité.
+
+## Progression prévue
+
+Les ajouts sont faits progressivement : connexion PDO, requêtes préparées, validation, authentification, sessions, CSRF, CRUD, API, React puis déploiement Linux.
