@@ -4,7 +4,7 @@ Boîte à outils personnelle pour retrouver rapidement les bases utiles en déve
 
 ## Contenu
 
-- `docs/` : fiches simples sur PHP, SQL, Git, React et Linux.
+- `docs/` : fiches simples sur PHP, SQL, JavaScript, Git, React et Linux.
 - `snippets/` : petits morceaux de code indépendants et réutilisables.
 - `templates/` : squelettes de projets plus complets à assembler et adapter.
 
@@ -14,4 +14,4 @@ Chaque ajout doit être court, commenté, testable et compréhensible. Un exempl
 
 ## Progression prévue
 
-Les ajouts sont faits progressivement : connexion PDO, requêtes préparées, validation, authentification, sessions, CSRF, CRUD, API, React puis déploiement Linux.
+Les ajouts sont faits progressivement : bases JavaScript, connexion PDO, requêtes préparées, validation, authentification, sessions, CSRF, CRUD, API, React puis déploiement Linux.

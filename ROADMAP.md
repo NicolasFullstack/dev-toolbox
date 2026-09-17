@@ -1,5 +1,14 @@
 # Feuille de route
 
+- Bases du langage JavaScript
+- Tableaux, objets et fonctions
+- Modules ES
+- DOM et événements
+- Formulaires et validation côté client
+- Promesses, `fetch` et `async`/`await`
+- Gestion des erreurs
+- Stockage navigateur et sécurité côté client
+- Tests JavaScript
 - Connexion PDO sécurisée
 - Requêtes préparées
 - Validation des formulaires
