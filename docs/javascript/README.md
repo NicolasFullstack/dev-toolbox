@@ -41,3 +41,7 @@ export function getActiveProductNames(products) {
 - Éviter `innerHTML` avec une valeur non fiable : ce point sera détaillé dans la fiche consacrée au DOM et à la sécurité côté client.
 
 L'exemple exécutable se trouve dans [`snippets/javascript/products.js`](../../snippets/javascript/products.js), avec des tests automatisés sans dépendance externe.
+
+## Suite du parcours
+
+- [`fetch`, promesses et `async`/`await`](fetch-et-async.md)
