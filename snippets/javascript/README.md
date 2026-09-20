@@ -12,4 +12,5 @@ La commande utilise le module de test intégré à Node.js : aucune dépendance 
 ## Exemples disponibles
 
 - `products.js` : tableaux, objets, fonctions et absence de mutation ;
+- `product-form.js` : DOM, événements et validation de formulaire ;
 - `fetch-json.js` : promesses, `async`/`await`, statuts HTTP et erreurs.

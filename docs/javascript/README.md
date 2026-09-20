@@ -44,4 +44,5 @@ L'exemple exécutable se trouve dans [`snippets/javascript/products.js`](../../s
 
 ## Suite du parcours
 
+- [DOM, événements et formulaires](dom-evenements-formulaires.md)
 - [`fetch`, promesses et `async`/`await`](fetch-et-async.md)
