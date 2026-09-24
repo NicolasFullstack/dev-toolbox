@@ -1,0 +1,11 @@
+{
+  "name": "dev-toolbox-react-snippets",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
