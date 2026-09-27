@@ -1,3 +1,8 @@
 # SQL
 
 Fiches sur les tables, relations, requêtes, jointures, index et transactions.
+
+## Parcours
+
+- [Contraintes et index d’un catalogue de produits](contraintes-et-index-produits.md)
+
