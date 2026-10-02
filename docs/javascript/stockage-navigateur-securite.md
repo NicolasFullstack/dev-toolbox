@@ -50,3 +50,5 @@ persistance était importante.
 L'exemple [`preferences-storage.js`](../../snippets/javascript/preferences-storage.js)
 applique une liste blanche, fournit des valeurs par défaut et se teste sans navigateur.
 
+La fiche [Authentification par cookie et protection CSRF](authentification-cookie-csrf.md)
+détaille pourquoi déplacer une session hors de `localStorage` ne suffit pas à la sécuriser.

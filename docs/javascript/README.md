@@ -48,3 +48,4 @@ L'exemple exécutable se trouve dans [`snippets/javascript/products.js`](../../s
 - [`fetch`, promesses et `async`/`await`](fetch-et-async.md)
 - [Validation des données reçues d’une API](valider-donnees-api.md)
 - [Stockage navigateur et sécurité](stockage-navigateur-securite.md)
+- [Authentification par cookie et protection CSRF](authentification-cookie-csrf.md)
