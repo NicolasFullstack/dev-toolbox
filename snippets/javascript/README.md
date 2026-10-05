@@ -16,3 +16,4 @@ La commande utilise le module de test intégré à Node.js : aucune dépendance 
 - `fetch-json.js` : promesses, `async`/`await`, statuts HTTP et erreurs ;
 - `product-api-schema.js` : validation et normalisation des données d’une API ;
 - `preferences-storage.js` : stockage navigateur, validation et liste blanche.
+- `authorization-ui.js` : permissions, propriété d’une ressource et adaptation de l’interface.
