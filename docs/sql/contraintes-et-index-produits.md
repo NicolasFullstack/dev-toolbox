@@ -14,6 +14,7 @@ certaines fonctions doit être adaptée au moteur choisi.
 - `UNIQUE` empêche les doublons ;
 - `CHECK` limite les valeurs acceptées par une règle métier ;
 - `FOREIGN KEY` garantit que la catégorie associée existe ;
+- `owner_id` relie chaque produit à un utilisateur existant ;
 - `ON DELETE RESTRICT` interdit de supprimer une catégorie encore utilisée ;
 - le prix est stocké en centimes dans un entier pour éviter les approximations des
   nombres à virgule flottante.
@@ -43,4 +44,3 @@ habitude. `EXPLAIN QUERY PLAN` permet ici de vérifier que SQLite utilise bien l
 
 Le fichier [`products-schema.sql`](../../snippets/sql/products-schema.sql) contient le
 schéma complet et ses tests exécutent les contraintes sur une base en mémoire.
-

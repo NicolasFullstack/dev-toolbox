@@ -19,11 +19,16 @@ function createDatabase(stock = 5) {
   const categoryId = database
     .prepare('INSERT INTO categories (name) VALUES (?) RETURNING id')
     .get('Claviers').id;
-  const productId = database.prepare(`
-    INSERT INTO products (category_id, name, price_cents, stock)
-    VALUES (?, ?, ?, ?)
+  const ownerId = database.prepare(`
+    INSERT INTO users (email, display_name)
+    VALUES (?, ?)
     RETURNING id
-  `).get(categoryId, 'Clavier MIDI', 9990, stock).id;
+  `).get('ada@example.test', 'Ada').id;
+  const productId = database.prepare(`
+    INSERT INTO products (owner_id, category_id, name, price_cents, stock)
+    VALUES (?, ?, ?, ?, ?)
+    RETURNING id
+  `).get(ownerId, categoryId, 'Clavier MIDI', 9990, stock).id;
 
   return { database, productId };
 }
@@ -106,4 +111,3 @@ test('refuse un identifiant ou une quantité invalide avant la transaction', () 
 
   database.close();
 });
-

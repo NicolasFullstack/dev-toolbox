@@ -14,3 +14,4 @@ Node.js 24 ou une version ultérieure est nécessaire pour le module SQLite int�
 
 - `products-schema.sql` : catégories, produits, contraintes et index composite.
 - `reserve-stock.js` : transaction atomique de réservation et mouvement de stock.
+- `update-owned-product.js` : modification limitée au propriétaire dans la requête SQL.

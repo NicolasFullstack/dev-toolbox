@@ -20,20 +20,30 @@ function insertCategory(database, name = 'Claviers') {
     .get(name).id;
 }
 
+function insertUser(database, email = 'ada@example.test') {
+  return database.prepare(`
+    INSERT INTO users (email, display_name)
+    VALUES (?, ?)
+    RETURNING id
+  `).get(email, 'Ada').id;
+}
+
 test('insère un produit valide avec des paramètres liés', () => {
   const database = createDatabase();
   const categoryId = insertCategory(database);
+  const ownerId = insertUser(database);
 
   const product = database.prepare(`
-    INSERT INTO products (category_id, name, price_cents)
-    VALUES (?, ?, ?)
-    RETURNING id, category_id, name, price_cents, active
-  `).get(categoryId, 'Clavier MIDI', 9990);
+    INSERT INTO products (owner_id, category_id, name, price_cents)
+    VALUES (?, ?, ?, ?)
+    RETURNING id, owner_id, category_id, name, price_cents, active
+  `).get(ownerId, categoryId, 'Clavier MIDI', 9990);
 
   assert.deepEqual(
     { ...product },
     {
       id: 1,
+      owner_id: 1,
       category_id: 1,
       name: 'Clavier MIDI',
       price_cents: 9990,
@@ -47,13 +57,14 @@ test('insère un produit valide avec des paramètres liés', () => {
 test('refuse un prix négatif', () => {
   const database = createDatabase();
   const categoryId = insertCategory(database);
+  const ownerId = insertUser(database);
   const insertProduct = database.prepare(`
-    INSERT INTO products (category_id, name, price_cents)
-    VALUES (?, ?, ?)
+    INSERT INTO products (owner_id, category_id, name, price_cents)
+    VALUES (?, ?, ?, ?)
   `);
 
   assert.throws(
-    () => insertProduct.run(categoryId, 'Produit invalide', -1),
+    () => insertProduct.run(ownerId, categoryId, 'Produit invalide', -1),
     /CHECK constraint failed/,
   );
 
@@ -62,12 +73,28 @@ test('refuse un prix négatif', () => {
 
 test('refuse une catégorie inexistante', () => {
   const database = createDatabase();
+  const ownerId = insertUser(database);
 
   assert.throws(
     () => database.prepare(`
-      INSERT INTO products (category_id, name, price_cents)
-      VALUES (?, ?, ?)
-    `).run(999, 'Produit orphelin', 1000),
+      INSERT INTO products (owner_id, category_id, name, price_cents)
+      VALUES (?, ?, ?, ?)
+    `).run(ownerId, 999, 'Produit orphelin', 1000),
+    /FOREIGN KEY constraint failed/,
+  );
+
+  database.close();
+});
+
+test('refuse un propriétaire inexistant', () => {
+  const database = createDatabase();
+  const categoryId = insertCategory(database);
+
+  assert.throws(
+    () => database.prepare(`
+      INSERT INTO products (owner_id, category_id, name, price_cents)
+      VALUES (?, ?, ?, ?)
+    `).run(999, categoryId, 'Produit orphelin', 1000),
     /FOREIGN KEY constraint failed/,
   );
 
@@ -89,10 +116,11 @@ test('refuse deux catégories identiques sans tenir compte de la casse', () => {
 test('interdit la suppression d’une catégorie encore utilisée', () => {
   const database = createDatabase();
   const categoryId = insertCategory(database);
+  const ownerId = insertUser(database);
   database.prepare(`
-    INSERT INTO products (category_id, name, price_cents)
-    VALUES (?, ?, ?)
-  `).run(categoryId, 'Clavier MIDI', 9990);
+    INSERT INTO products (owner_id, category_id, name, price_cents)
+    VALUES (?, ?, ?, ?)
+  `).run(ownerId, categoryId, 'Clavier MIDI', 9990);
 
   assert.throws(
     () => database.prepare('DELETE FROM categories WHERE id = ?').run(categoryId),
@@ -122,4 +150,3 @@ test('utilise l’index pour filtrer et trier les produits actifs', () => {
 
   database.close();
 });
-
