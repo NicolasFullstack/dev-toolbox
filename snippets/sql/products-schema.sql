@@ -38,6 +38,9 @@ CREATE TABLE products (
 CREATE INDEX idx_products_category_active_name
     ON products (category_id, active, name);
 
+CREATE INDEX idx_products_active_created_id
+    ON products (active, created_at DESC, id DESC);
+
 CREATE TABLE stock_movements (
     id INTEGER PRIMARY KEY,
     product_id INTEGER NOT NULL,
