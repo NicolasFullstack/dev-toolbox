@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { fetchJson, HttpError } from '../fetch-json.js';
+import { fetchJson, HttpError, NetworkError } from '../fetch-json.js';
 
 test('renvoie les données d’une réponse JSON réussie', async () => {
   const result = await fetchJson('https://api.example.test/products', {
@@ -10,7 +10,6 @@ test('renvoie les données d’une réponse JSON réussie', async () => {
       headers: { 'Content-Type': 'application/json; charset=utf-8' },
     }),
   });
-
   assert.deepEqual(result, [{ id: 1 }]);
 });
 
@@ -35,7 +34,6 @@ test('renvoie null pour une réponse 204', async () => {
   const result = await fetchJson('https://api.example.test/session', {
     fetchImpl: async () => new Response(null, { status: 204 }),
   });
-
   assert.equal(result, null);
 });
 
@@ -54,7 +52,6 @@ test('refuse une réponse réussie qui n’est pas en JSON', async () => {
 test('transmet le signal d’annulation à fetch', async () => {
   const controller = new AbortController();
   let receivedSignal;
-
   await fetchJson('https://api.example.test/products', {
     signal: controller.signal,
     fetchImpl: async (_url, options) => {
@@ -62,6 +59,17 @@ test('transmet le signal d’annulation à fetch', async () => {
       return new Response(null, { status: 204 });
     },
   });
-
   assert.equal(receivedSignal, controller.signal);
+});
+
+test('distingue une panne réseau d’une erreur de réponse', async () => {
+  const cause = new TypeError('connexion indisponible');
+  await assert.rejects(
+    fetchJson('https://api.example.test/products', {
+      fetchImpl: async () => {
+        throw cause;
+      },
+    }),
+    (error) => error instanceof NetworkError && error.cause === cause,
+  );
 });

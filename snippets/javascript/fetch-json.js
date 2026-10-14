@@ -1,19 +1,20 @@
 export class HttpError extends Error {
-  constructor(status, data = null) {
+  constructor(status, data = null, { retryAfter = null } = {}) {
     super(`La requête a échoué avec le statut ${status}.`);
     this.name = 'HttpError';
     this.status = status;
     this.data = data;
+    this.retryAfter = retryAfter;
   }
 }
 
-/**
- * Récupère une ressource JSON et transforme les erreurs HTTP en exceptions.
- *
- * @param {string | URL} url
- * @param {{fetchImpl?: typeof fetch, signal?: AbortSignal}} options
- * @returns {Promise<unknown>}
- */
+export class NetworkError extends Error {
+  constructor(cause) {
+    super('La requête réseau a échoué.', { cause });
+    this.name = 'NetworkError';
+  }
+}
+
 export async function fetchJson(
   url,
   { fetchImpl = globalThis.fetch, signal } = {},
@@ -22,10 +23,20 @@ export async function fetchJson(
     throw new TypeError('Une implémentation de fetch est nécessaire.');
   }
 
-  const response = await fetchImpl(url, {
-    headers: { Accept: 'application/json' },
-    signal,
-  });
+  let response;
+
+  try {
+    response = await fetchImpl(url, {
+      headers: { Accept: 'application/json' },
+      signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw error;
+    }
+
+    throw new NetworkError(error);
+  }
 
   if (response.status === 204) {
     return null;
@@ -34,11 +45,12 @@ export async function fetchJson(
   const contentType = response.headers.get('content-type') ?? '';
   const mediaType = contentType.split(';', 1)[0].trim().toLowerCase();
   const isJson = mediaType === 'application/json' || mediaType.endsWith('+json');
-
   const data = isJson ? await response.json() : null;
 
   if (!response.ok) {
-    throw new HttpError(response.status, data);
+    throw new HttpError(response.status, data, {
+      retryAfter: response.headers.get('retry-after'),
+    });
   }
 
   if (!isJson) {
