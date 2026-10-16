@@ -1,23 +1,48 @@
 const FIELD_NAMES = ['name', 'price'];
+const MAX_SAFE_CENTS = BigInt(Number.MAX_SAFE_INTEGER);
+
+function parsePriceCents(value) {
+  const rawValue = typeof value === 'number' ? String(value) : value;
+
+  if (typeof rawValue !== 'string') {
+    return null;
+  }
+
+  const match = /^(\d+)(?:[.,](\d{1,2}))?$/.exec(rawValue.trim());
+  if (!match) {
+    return null;
+  }
+
+  const cents = (BigInt(match[1]) * 100n)
+    + BigInt((match[2] ?? '').padEnd(2, '0') || '0');
+
+  if (cents <= 0n || cents > MAX_SAFE_CENTS) {
+    return null;
+  }
+
+  return Number(cents);
+}
 
 export function validateProductInput(input) {
-  const name = typeof input.name === 'string' ? input.name.trim() : '';
-  const rawPrice = typeof input.price === 'string' ? input.price.trim() : input.price;
-  const price = Number(rawPrice);
+  const source = input !== null && typeof input === 'object' && !Array.isArray(input)
+    ? input
+    : {};
+  const name = typeof source.name === 'string' ? source.name.trim() : '';
+  const priceCents = parsePriceCents(source.price);
   const errors = {};
 
   if (name.length < 3 || name.length > 100) {
     errors.name = 'Le nom doit contenir entre 3 et 100 caractères.';
   }
 
-  if (rawPrice === '' || !Number.isFinite(price) || price <= 0) {
-    errors.price = 'Le prix doit être un nombre strictement positif.';
+  if (priceCents === null) {
+    errors.price = 'Le prix doit être positif et contenir au maximum deux décimales.';
   }
 
   return {
     value: {
       name,
-      price: Math.round(price * 100) / 100,
+      priceCents,
     },
     errors,
   };
@@ -25,7 +50,7 @@ export function validateProductInput(input) {
 
 export function renderProductFormErrors(form, errors) {
   for (const fieldName of FIELD_NAMES) {
-    const errorElement = form.querySelector(`[data-error-for="${fieldName}"]`);
+    const errorElement = form.querySelector('[data-error-for="' + fieldName + '"]');
 
     if (!errorElement) {
       continue;

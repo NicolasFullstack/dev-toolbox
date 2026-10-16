@@ -22,20 +22,34 @@ class FakeForm extends EventTarget {
   }
 }
 
-test('normalise un produit valide', () => {
+test('normalise un produit valide en centimes entiers', () => {
   const result = validateProductInput({
     name: '  Clavier MIDI  ',
-    price: '99.999',
+    price: '99.99',
   });
 
   assert.deepEqual(result, {
-    value: { name: 'Clavier MIDI', price: 100 },
+    value: { name: 'Clavier MIDI', priceCents: 9999 },
     errors: {},
   });
 });
 
+test('convertit exactement les décimales sans calcul flottant', () => {
+  assert.equal(validateProductInput({ name: 'Câble', price: '0.29' }).value.priceCents, 29);
+  assert.equal(validateProductInput({ name: 'Câble', price: '12,5' }).value.priceCents, 1250);
+});
+
+test('refuse les arrondis implicites et les syntaxes ambiguës', () => {
+  for (const price of ['99.999', '1e3', '-2', '', '0']) {
+    const { errors, value } = validateProductInput({ name: 'Clavier', price });
+
+    assert.match(errors.price, /au maximum deux décimales/);
+    assert.equal(value.priceCents, null);
+  }
+});
+
 test('signale un nom et un prix invalides', () => {
-  const { errors } = validateProductInput({ name: 'A', price: '' });
+  const { errors } = validateProductInput({ name: 'A', price: null });
 
   assert.deepEqual(Object.keys(errors), ['name', 'price']);
 });
@@ -45,10 +59,7 @@ test('affiche puis efface les erreurs avec textContent', () => {
 
   renderProductFormErrors(form, { name: '<strong>Nom invalide</strong>' });
 
-  assert.equal(
-    form.errorElements.name.textContent,
-    '<strong>Nom invalide</strong>',
-  );
+  assert.equal(form.errorElements.name.textContent, '<strong>Nom invalide</strong>');
   assert.equal(form.errorElements.name.hidden, false);
   assert.equal(form.errorElements.price.hidden, true);
 
@@ -69,7 +80,7 @@ test('intercepte submit et transmet uniquement les données valides', () => {
   form.dispatchEvent(event);
 
   assert.equal(event.defaultPrevented, true);
-  assert.deepEqual(submissions, [{ name: 'Pédale', price: 34.5 }]);
+  assert.deepEqual(submissions, [{ name: 'Pédale', priceCents: 3450 }]);
 
   unbind();
   form.dispatchEvent(new Event('submit', { cancelable: true }));
