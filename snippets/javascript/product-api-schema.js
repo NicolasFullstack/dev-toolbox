@@ -7,7 +7,8 @@ export class ApiDataError extends TypeError {
 }
 
 function invalidProduct(index, detail) {
-  return new ApiDataError(`Produit ${index} invalide : ${detail}`, { index });
+  const location = index === null ? '' : ' ' + index;
+  return new ApiDataError('Produit' + location + ' invalide : ' + detail, { index });
 }
 
 function parseProduct(value, index) {
@@ -51,4 +52,8 @@ export function parseProductList(value) {
   }
 
   return value.map(parseProduct);
+}
+
+export function parseProductResponse(value) {
+  return parseProduct(value, null);
 }

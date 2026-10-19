@@ -45,6 +45,7 @@ L'exemple exécutable se trouve dans [`snippets/javascript/products.js`](../../s
 ## Suite du parcours
 
 - [DOM, événements et formulaires](dom-evenements-formulaires.md)
+- [Relier un formulaire à une API](creer-produit-api.md)
 - [`fetch`, promesses et `async`/`await`](fetch-et-async.md)
 - [Retenter une lecture après une panne temporaire](reprises-reseau.md)
 - [Validation des données reçues d’une API](valider-donnees-api.md)
