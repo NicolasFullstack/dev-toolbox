@@ -19,7 +19,8 @@ gère déjà le cookie de session, le jeton CSRF et les erreurs HTTP.
       request: sessionRequest,
     });
 
-    const result = await submitProduct(values);
+    const idempotencyKey = crypto.randomUUID();
+    const result = await submitProduct(values, { idempotencyKey });
 
     if (!result.ok) {
       renderProductFormErrors(form, result.errors);
@@ -39,8 +40,26 @@ propriétaire de la session authentifiée et vérifier l’autorisation.
 - Une réponse 2xx dont les données ne respectent pas le contrat est également
   rejetée avant d’entrer dans l’état de l’application.
 
-Une mutation POST n’est pas relancée automatiquement. Une répétition demanderait
-un mécanisme d’idempotence défini avec l’API.
+## Éviter une création en double
+
+La réponse d’un `POST` peut être perdue alors que le serveur a bien créé la
+ressource. Relancer la requête avec une nouvelle identité risquerait alors de
+créer un doublon.
+
+La clé d’idempotence représente une opération précise :
+
+- elle est créée au début de la soumission ;
+- elle est conservée tant que le résultat reste incertain ;
+- elle est réutilisée uniquement pour reprendre cette même opération ;
+- une nouvelle saisie reçoit une nouvelle clé.
+
+L’exemple accepte uniquement une clé de 16 à 128 caractères sûrs et l’envoie dans
+`Idempotency-Key`. Il ne relance jamais le `POST` automatiquement. Le serveur doit
+encore associer la clé à l’utilisateur et à la route, mémoriser le premier résultat
+et renvoyer ce résultat lors d’une répétition.
+
+Une clé d’idempotence ne remplace ni le jeton CSRF, ni l’authentification, ni le
+contrôle des permissions.
 
 ## Ce que le serveur doit encore garantir
 

@@ -4,6 +4,8 @@ import test from 'node:test';
 import { ApiDataError } from '../product-api-schema.js';
 import { createProductSubmission } from '../submit-product.js';
 
+const IDEMPOTENCY_KEY = '018f47e2-81a6-7f21-b74c-2f9b0ca42ad5';
+
 test('valide, envoie et normalise le produit créé', async () => {
   let captured;
   const submitProduct = createProductSubmission({
@@ -23,12 +25,13 @@ test('valide, envoie et normalise le produit créé', async () => {
     name: '  Clavier  ',
     price: '99.99',
     active: true,
-  });
+  }, { idempotencyKey: IDEMPOTENCY_KEY });
 
   assert.deepEqual(captured, {
     endpoint: 'products',
     options: {
       method: 'POST',
+      headers: { 'Idempotency-Key': IDEMPOTENCY_KEY },
       body: { name: 'Clavier', priceCents: 9999 },
     },
   });
@@ -43,7 +46,7 @@ test('valide, envoie et normalise le produit créé', async () => {
   });
 });
 
-test('n’appelle pas le réseau lorsque le formulaire est invalide', async () => {
+test('n’exige pas de clé et n’appelle pas le réseau si le formulaire est invalide', async () => {
   let requestCalls = 0;
   const submitProduct = createProductSubmission({
     request: async () => {
@@ -58,6 +61,53 @@ test('n’appelle pas le réseau lorsque le formulaire est invalide', async () =
   assert.equal(requestCalls, 0);
 });
 
+test('refuse une clé absente, trop longue ou contenant des espaces', async () => {
+  let requestCalls = 0;
+  const submitProduct = createProductSubmission({
+    request: async () => {
+      requestCalls += 1;
+    },
+  });
+
+  for (const idempotencyKey of [
+    undefined,
+    'trop-court',
+    'a'.repeat(129),
+    'clé avec espace',
+  ]) {
+    await assert.rejects(
+      submitProduct(
+        { name: 'Produit', price: '10' },
+        { idempotencyKey },
+      ),
+      /clé d’idempotence/,
+    );
+  }
+
+  assert.equal(requestCalls, 0);
+});
+
+test('réutilise la même clé uniquement pour reprendre la même opération', async () => {
+  const keys = [];
+  const submitProduct = createProductSubmission({
+    request: async (_endpoint, options) => {
+      keys.push(options.headers['Idempotency-Key']);
+      return {
+        id: keys.length,
+        active: true,
+        ...options.body,
+      };
+    },
+  });
+  const input = { name: 'Produit', price: '10' };
+
+  await submitProduct(input, { idempotencyKey: IDEMPOTENCY_KEY });
+  await submitProduct(input, { idempotencyKey: IDEMPOTENCY_KEY });
+
+  assert.deepEqual(keys, [IDEMPOTENCY_KEY, IDEMPOTENCY_KEY]);
+  assert.deepEqual(input, { name: 'Produit', price: '10' });
+});
+
 test('refuse une réponse API invalide après la création', async () => {
   const submitProduct = createProductSubmission({
     request: async () => ({
@@ -69,7 +119,10 @@ test('refuse une réponse API invalide après la création', async () => {
   });
 
   await assert.rejects(
-    submitProduct({ name: 'Produit', price: '10' }),
+    submitProduct(
+      { name: 'Produit', price: '10' },
+      { idempotencyKey: IDEMPOTENCY_KEY },
+    ),
     ApiDataError,
   );
 });
@@ -83,7 +136,10 @@ test('laisse remonter l’erreur technique de la requête', async () => {
   });
 
   await assert.rejects(
-    submitProduct({ name: 'Produit', price: '10' }),
+    submitProduct(
+      { name: 'Produit', price: '10' },
+      { idempotencyKey: IDEMPOTENCY_KEY },
+    ),
     (error) => error === failure,
   );
 });
