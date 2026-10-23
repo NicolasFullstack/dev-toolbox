@@ -56,3 +56,27 @@ CREATE TABLE stock_movements (
 
 CREATE INDEX idx_stock_movements_product_created
     ON stock_movements (product_id, created_at);
+
+CREATE TABLE idempotency_requests (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    route TEXT NOT NULL
+        CHECK (length(route) BETWEEN 1 AND 120),
+    idempotency_key TEXT NOT NULL
+        CHECK (length(idempotency_key) BETWEEN 16 AND 128),
+    request_hash TEXT NOT NULL
+        CHECK (length(request_hash) = 64),
+    response_status INTEGER NOT NULL
+        CHECK (response_status BETWEEN 200 AND 599),
+    response_body TEXT NOT NULL
+        CHECK (json_valid(response_body)),
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at TEXT NOT NULL,
+    UNIQUE (user_id, route, idempotency_key),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+CREATE INDEX idx_idempotency_requests_expires_at
+    ON idempotency_requests (expires_at);

@@ -8,3 +8,4 @@ Fiches sur les tables, relations, requêtes, jointures, index et transactions.
 - [Réserver du stock avec une transaction](transactions-stock.md)
 - [Autoriser la modification du propriétaire en SQL](autoriser-modification-proprietaire.md)
 - [Paginer une API avec un curseur SQL](pagination-par-curseur.md)
+- [Rendre une mutation idempotente en SQL](idempotence-des-mutations.md)
