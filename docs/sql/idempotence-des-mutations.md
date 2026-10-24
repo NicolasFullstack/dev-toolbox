@@ -36,6 +36,12 @@ Une application distribuée doit aussi définir la durée de conservation, le ne
 des clés expirées, le comportement des requêtes encore en cours et l’isolation de la
 base utilisée en production.
 
+Les dates sont normalisées en UTC avant stockage afin que leur comparaison textuelle
+reste fiable. `deleteExpiredIdempotencyRequests` supprime les entrées expirées par
+lots de 1 à 1 000 lignes : une tâche périodique peut ainsi nettoyer la table sans
+lancer une suppression non bornée. La durée de conservation reste une décision
+métier à documenter selon le risque de reprise tardive.
+
 L’empreinte doit être calculée côté serveur à partir d’un corps normalisé. Il ne faut
 ni faire confiance à une empreinte fournie par le client, ni utiliser la clé comme
 authentification. Les contrôles de session, CSRF, autorisation et validation restent

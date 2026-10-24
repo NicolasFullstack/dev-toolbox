@@ -4,6 +4,7 @@ import test from 'node:test';
 import { DatabaseSync } from 'node:sqlite';
 
 import {
+  deleteExpiredIdempotencyRequests,
   IdempotencyConflictError,
   runIdempotentRequest,
 } from '../idempotent-request.js';
@@ -153,6 +154,78 @@ test('valide la portée, la clé et l’empreinte avant la transaction', () => {
   assert.throws(
     () => runIdempotentRequest(database, request(userId, { requestHash: 'pas-un-hash' }), operation),
     /requestHash/,
+  );
+  database.close();
+});
+
+test('normalise la date d’expiration en UTC', () => {
+  const { database, userId } = createDatabase();
+  runIdempotentRequest(
+    database,
+    request(userId, { expiresAt: '2026-10-24T14:00:00+02:00' }),
+    () => ({ status: 201, body: {} }),
+  );
+
+  const stored = database.prepare(`
+    SELECT expires_at FROM idempotency_requests
+  `).get();
+
+  assert.equal(stored.expires_at, '2026-10-24T12:00:00.000Z');
+  database.close();
+});
+
+test('supprime les clés expirées par lots bornés', () => {
+  const { database, userId } = createDatabase();
+  const insert = (suffix, expiresAt) => runIdempotentRequest(
+    database,
+    request(userId, {
+      idempotencyKey: `key-000000000${suffix}`,
+      expiresAt,
+    }),
+    () => ({ status: 201, body: { suffix } }),
+  );
+
+  insert('001', '2026-10-20T12:00:00Z');
+  insert('002', '2026-10-21T12:00:00Z');
+  insert('003', '2026-10-22T12:00:00Z');
+  insert('004', '2026-10-30T12:00:00Z');
+
+  assert.equal(deleteExpiredIdempotencyRequests(database, {
+    now: '2026-10-24T12:00:00Z',
+    limit: 2,
+  }), 2);
+  assert.equal(deleteExpiredIdempotencyRequests(database, {
+    now: '2026-10-24T12:00:00Z',
+    limit: 2,
+  }), 1);
+  const remainingKeys = database
+    .prepare('SELECT idempotency_key FROM idempotency_requests')
+    .all()
+    .map(({ idempotency_key: key }) => key);
+  assert.deepEqual(remainingKeys, ['key-000000000004']);
+  database.close();
+});
+
+test('refuse une date ou une taille de lot invalide', () => {
+  const { database } = createDatabase();
+
+  assert.throws(
+    () => deleteExpiredIdempotencyRequests(database, { now: 'demain' }),
+    /now/,
+  );
+  assert.throws(
+    () => deleteExpiredIdempotencyRequests(database, {
+      now: '2026-10-24T12:00:00Z',
+      limit: 0,
+    }),
+    /limit/,
+  );
+  assert.throws(
+    () => deleteExpiredIdempotencyRequests(database, {
+      now: '2026-10-24T12:00:00Z',
+      limit: 1001,
+    }),
+    /limit/,
   );
   database.close();
 });

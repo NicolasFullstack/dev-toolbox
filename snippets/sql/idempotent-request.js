@@ -37,6 +37,19 @@ function normalizeResponse(response) {
   return { status: response.status, responseBody };
 }
 
+function normalizeIsoDate(value, label) {
+  if (typeof value !== 'string') {
+    throw new TypeError(`${label} doit être une date ISO valide.`);
+  }
+
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) {
+    throw new TypeError(`${label} doit être une date ISO valide.`);
+  }
+
+  return new Date(timestamp).toISOString();
+}
+
 export function runIdempotentRequest(database, request, operation) {
   if (!database || typeof database.exec !== 'function') {
     throw new TypeError('Une connexion SQLite valide est nécessaire.');
@@ -47,10 +60,10 @@ export function runIdempotentRequest(database, request, operation) {
   }
 
   const { userId, route, idempotencyKey, requestHash } = request;
-  const expiresAt = request.expiresAt ?? '9999-12-31T23:59:59Z';
-  if (typeof expiresAt !== 'string' || Number.isNaN(Date.parse(expiresAt))) {
-    throw new TypeError('expiresAt doit être une date ISO valide.');
-  }
+  const expiresAt = normalizeIsoDate(
+    request.expiresAt ?? '9999-12-31T23:59:59Z',
+    'expiresAt',
+  );
 
   database.exec('BEGIN IMMEDIATE');
 
@@ -100,4 +113,29 @@ export function runIdempotentRequest(database, request, operation) {
     database.exec('ROLLBACK');
     throw error;
   }
+}
+
+export function deleteExpiredIdempotencyRequests(
+  database,
+  { now, limit = 100 } = {},
+) {
+  if (!database || typeof database.prepare !== 'function') {
+    throw new TypeError('Une connexion SQLite valide est nécessaire.');
+  }
+  if (!Number.isSafeInteger(limit) || limit < 1 || limit > 1000) {
+    throw new TypeError('limit doit être un entier compris entre 1 et 1000.');
+  }
+
+  const normalizedNow = normalizeIsoDate(now, 'now');
+  return database.prepare(`
+    DELETE FROM idempotency_requests
+    WHERE id IN (
+      SELECT id
+      FROM idempotency_requests
+      WHERE expires_at <= ?
+      ORDER BY expires_at, id
+      LIMIT ?
+    )
+    RETURNING id
+  `).all(normalizedNow, limit).length;
 }
