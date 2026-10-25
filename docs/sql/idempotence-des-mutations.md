@@ -42,6 +42,11 @@ lots de 1 à 1 000 lignes : une tâche périodique peut ainsi nettoyer la table 
 lancer une suppression non bornée. La durée de conservation reste une décision
 métier à documenter selon le risque de reprise tardive.
 
+La lecture vérifie aussi l’expiration dans la transaction : une entrée dépassée est
+retirée avant la recherche, puis la mutation est traitée comme une nouvelle opération.
+La sécurité du rejeu ne dépend donc pas du passage exact de la tâche de nettoyage.
+Une nouvelle entrée doit toujours recevoir une expiration future.
+
 L’empreinte doit être calculée côté serveur à partir d’un corps normalisé. Il ne faut
 ni faire confiance à une empreinte fournie par le client, ni utiliser la clé comme
 authentification. Les contrôles de session, CSRF, autorisation et validation restent

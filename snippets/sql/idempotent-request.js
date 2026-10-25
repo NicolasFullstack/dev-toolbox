@@ -64,10 +64,25 @@ export function runIdempotentRequest(database, request, operation) {
     request.expiresAt ?? '9999-12-31T23:59:59Z',
     'expiresAt',
   );
+  const now = normalizeIsoDate(
+    request.now ?? new Date().toISOString(),
+    'now',
+  );
+  if (expiresAt <= now) {
+    throw new TypeError('expiresAt doit être postérieure à now.');
+  }
 
   database.exec('BEGIN IMMEDIATE');
 
   try {
+    database.prepare(`
+      DELETE FROM idempotency_requests
+      WHERE user_id = ?
+        AND route = ?
+        AND idempotency_key = ?
+        AND expires_at <= ?
+    `).run(userId, route, idempotencyKey, now);
+
     const existing = database.prepare(`
       SELECT request_hash, response_status, response_body
       FROM idempotency_requests

@@ -33,6 +33,7 @@ function request(userId, overrides = {}) {
     route: '/products',
     idempotencyKey: KEY,
     requestHash: HASH,
+    now: '2026-10-24T10:00:00Z',
     expiresAt: '2026-10-24T12:00:00Z',
     ...overrides,
   };
@@ -180,6 +181,7 @@ test('supprime les clés expirées par lots bornés', () => {
     database,
     request(userId, {
       idempotencyKey: `key-000000000${suffix}`,
+      now: '2026-10-19T12:00:00Z',
       expiresAt,
     }),
     () => ({ status: 201, body: { suffix } }),
@@ -226,6 +228,65 @@ test('refuse une date ou une taille de lot invalide', () => {
       limit: 1001,
     }),
     /limit/,
+  );
+  database.close();
+});
+
+test('ne rejoue pas une réponse dont la clé a expiré', () => {
+  const { database, userId } = createDatabase();
+  let calls = 0;
+  const operation = () => {
+    calls += 1;
+    return { status: 201, body: { id: calls } };
+  };
+
+  runIdempotentRequest(
+    database,
+    request(userId, {
+      now: '2026-10-24T10:00:00Z',
+      expiresAt: '2026-10-24T11:00:00Z',
+    }),
+    operation,
+  );
+  const renewed = runIdempotentRequest(
+    database,
+    request(userId, {
+      now: '2026-10-24T12:00:00Z',
+      expiresAt: '2026-10-25T12:00:00Z',
+    }),
+    operation,
+  );
+
+  assert.equal(calls, 2);
+  assert.deepEqual(renewed, {
+    replayed: false,
+    status: 201,
+    body: { id: 2 },
+  });
+  assert.equal(
+    database.prepare('SELECT COUNT(*) AS count FROM idempotency_requests').get().count,
+    1,
+  );
+  database.close();
+});
+
+test('refuse une expiration passée lors du premier traitement', () => {
+  const { database, userId } = createDatabase();
+
+  assert.throws(
+    () => runIdempotentRequest(
+      database,
+      request(userId, {
+        now: '2026-10-24T12:00:00Z',
+        expiresAt: '2026-10-24T11:59:59Z',
+      }),
+      () => ({ status: 201, body: {} }),
+    ),
+    /postérieure/,
+  );
+  assert.equal(
+    database.prepare('SELECT COUNT(*) AS count FROM idempotency_requests').get().count,
+    0,
   );
   database.close();
 });
