@@ -9,3 +9,4 @@ Fiches sur les tables, relations, requêtes, jointures, index et transactions.
 - [Autoriser la modification du propriétaire en SQL](autoriser-modification-proprietaire.md)
 - [Paginer une API avec un curseur SQL](pagination-par-curseur.md)
 - [Rendre une mutation idempotente en SQL](idempotence-des-mutations.md)
+- [Appliquer des migrations SQL versionnées](migrations-versionnees.md)

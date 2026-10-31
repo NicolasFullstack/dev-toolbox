@@ -17,3 +17,4 @@ Node.js 24 ou une version ultérieure est nécessaire pour le module SQLite int�
 - `update-owned-product.js` : modification limitée au propriétaire dans la requête SQL.
 - `list-products-page.js` : pagination stable par curseur composé.
 - `idempotent-request.js` : mutation, rejeu et purge bornée des réponses mémorisées.
+- `run-migrations.js` : migrations ordonnées, atomiques et vérifiées par empreinte.
