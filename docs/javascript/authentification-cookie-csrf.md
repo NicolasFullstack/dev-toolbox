@@ -68,3 +68,15 @@ depuis une autre origine.
 Un cookie `HttpOnly` empêche la lecture du secret, mais une faille XSS peut encore exécuter des
 actions au nom de l’utilisateur. Il faut donc continuer à valider les données, éviter
 `innerHTML` avec du contenu non fiable et appliquer une politique de sécurité du contenu adaptée.
+
+
+## Exemple exécutable côté client
+
+L’adaptateur [`session-request.js`](../../snippets/javascript/session-request.js)
+force l’envoi du cookie avec `credentials: 'include'`. Il retire tout en-tête
+CSRF sur les méthodes sûres et remplace, sur une mutation, une valeur fournie par
+l’appelant par le jeton issu de la source approuvée. Le format et la taille du
+jeton sont contrôlés avant l’appel réseau.
+
+Ce code ne crée ni la session ni le jeton : le serveur reste responsable de leur
+génération, de leur rotation, de leur expiration et de leur vérification.
