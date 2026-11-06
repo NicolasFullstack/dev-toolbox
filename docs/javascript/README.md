@@ -52,4 +52,5 @@ L'exemple exécutable se trouve dans [`snippets/javascript/products.js`](../../s
 - [Validation des données reçues d’une API](valider-donnees-api.md)
 - [Stockage navigateur et sécurité](stockage-navigateur-securite.md)
 - [Authentification par cookie et protection CSRF](authentification-cookie-csrf.md)
+- [Réagir à une session expirée : `401` ou `403` ?](session-expiree-401-403.md)
 - [Autorisations côté client : rôles, permissions et propriété](autorisations-cote-client.md)
