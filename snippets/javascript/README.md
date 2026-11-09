@@ -22,3 +22,4 @@ La commande utilise le module de test intégré à Node.js : aucune dépendance 
 - `authorization-ui.js` : permissions, propriété d’une ressource et adaptation de l’interface.
 - `session-request.js` : cookie de session, méthodes sûres et en-tête CSRF contrôlé.
 - `session-guard.js` : expiration de session, distinction `401`/`403` et notification unique.
+- `logout.js` : révocation de session protégée, double clic et erreurs non masquées.
