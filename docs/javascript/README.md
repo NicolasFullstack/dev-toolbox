@@ -55,4 +55,5 @@ L'exemple exécutable se trouve dans [`snippets/javascript/products.js`](../../s
 - [Réagir à une session expirée : `401` ou `403` ?](session-expiree-401-403.md)
 - [Déconnecter une session sans faux sentiment de sécurité](deconnexion-securisee.md)
 - [Connecter une session sans exposer les identifiants](connexion-securisee.md)
+- [Restaurer une session au démarrage sans créer de course](restaurer-session-demarrage.md)
 - [Autorisations côté client : rôles, permissions et propriété](autorisations-cote-client.md)
