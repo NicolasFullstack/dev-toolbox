@@ -25,3 +25,4 @@ La commande utilise le module de test intégré à Node.js : aucune dépendance 
 - `logout.js` : révocation de session protégée, double clic et erreurs non masquées.
 - `login.js` : validation des identifiants, CSRF de pré-authentification et réponse contrôlée.
 - `session-bootstrap.js` : restauration au démarrage, requête partagée et réponse tardive ignorée.
+- `route-access.js` : attente de la session, connexion requise et permissions de route.

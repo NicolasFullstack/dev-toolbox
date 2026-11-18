@@ -57,3 +57,4 @@ L'exemple exécutable se trouve dans [`snippets/javascript/products.js`](../../s
 - [Connecter une session sans exposer les identifiants](connexion-securisee.md)
 - [Restaurer une session au démarrage sans créer de course](restaurer-session-demarrage.md)
 - [Autorisations côté client : rôles, permissions et propriété](autorisations-cote-client.md)
+- [Protéger une route après la restauration de session](proteger-route-session-permissions.md)
