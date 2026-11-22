@@ -15,6 +15,7 @@ La commande utilise le module de test intégré à Node.js : aucune dépendance 
 - `product-form.js` : DOM, validation de formulaire et conversion exacte en centimes ;
 - `submit-product.js` : validation, mutation API et contrôle de la réponse ;
 - `update-product-with-etag.js` : modification conditionnelle et conflit `412` ;
+- `delete-product-with-etag.js` : suppression conditionnelle, CSRF et réponse `204` ;
 - `fetch-json.js` : promesses, `async`/`await`, statuts HTTP et erreurs ;
 - `fetch-json-with-retry.js` : reprises bornées des lectures après une panne temporaire ;
 - `product-api-schema.js` : validation et normalisation des données d’une API ;
