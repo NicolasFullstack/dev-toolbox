@@ -38,6 +38,26 @@ l'identifiant ne correspond plus est ignorée. Un `AbortController` reste utile 
 annuler la requête précédente, mais le contrôle dans le reducer constitue une seconde
 protection contre les courses asynchrones.
 
+## Après une suppression confirmée
+
+Le reducer ne doit pas envoyer lui-même la requête. La couche HTTP effectue le `DELETE`,
+contrôle la réponse `204`, puis l’interface décrit seulement le résultat :
+
+```js
+const deleted = await deleteProduct({ id: product.id, etag });
+dispatch({ type: 'productDeleted', id: deleted.id });
+```
+
+La transition crée un nouveau tableau sans modifier le précédent. Si le produit est déjà
+absent, elle renvoie le même état. Elle annule aussi l’identifiant d’un chargement commencé
+avant la suppression : sa réponse tardive sera ignorée au lieu de réintroduire l’ancienne
+copie du produit.
+
+Cette transition ne doit être envoyée ni après un conflit `412`, ni après une panne réseau
+dont le résultat reste incertain. La fiche sur la
+[suppression conditionnelle](../javascript/supprimer-produit-etag-csrf.md) détaille ce
+contrat HTTP.
+
 ## Règles à retenir
 
 - ne jamais modifier directement `state` ou ses tableaux ;

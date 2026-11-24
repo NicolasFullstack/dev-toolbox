@@ -10,5 +10,5 @@ npm test
 
 ## Exemples disponibles
 
-- `products-reducer.js` : états de chargement et protection contre les réponses obsolètes.
+- `products-reducer.js` : chargements, suppression confirmée et réponses obsolètes.
 
