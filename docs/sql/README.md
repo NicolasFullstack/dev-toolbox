@@ -10,3 +10,4 @@ Fiches sur les tables, relations, requêtes, jointures, index et transactions.
 - [Paginer une API avec un curseur SQL](pagination-par-curseur.md)
 - [Rendre une mutation idempotente en SQL](idempotence-des-mutations.md)
 - [Appliquer des migrations SQL versionnées](migrations-versionnees.md)
+- [Rechercher et filtrer avec des paramètres](recherche-filtres-parametres.md)

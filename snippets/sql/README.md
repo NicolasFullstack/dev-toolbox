@@ -18,3 +18,4 @@ Node.js 24 ou une version ultérieure est nécessaire pour le module SQLite int�
 - `list-products-page.js` : pagination stable par curseur composé.
 - `idempotent-request.js` : mutation, rejeu et purge bornée des réponses mémorisées.
 - `run-migrations.js` : migrations ordonnées, atomiques et vérifiées par empreinte.
+- `search-products.js` : recherche paramétrée, filtres bornés et tri sur liste blanche.
